@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 import boto3
 from PIL import Image
@@ -36,6 +37,9 @@ def extract_face(filename, required_size=(160, 160)):
 
 if __name__ == "__main__":
 
+    if not os.path.exists('output'):
+        os.makedirs('output')
+
     args = configure_args()
     set_logger('output/train.log')
 
@@ -45,6 +49,9 @@ if __name__ == "__main__":
     label_dict = {}
     user_list = []
     label_list = []
+
+    logging.info('Detecting faces...')
+    
     with open('data/user_data.txt', 'r') as f:
         for i, line in islice(enumerate(f), args.start, args.end):
             info = json.loads(line)
