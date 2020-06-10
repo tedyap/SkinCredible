@@ -6,3 +6,5 @@ data/
 output/
 model/test.py
 *.ipynb*
+*.csv*
+*.txt*
