@@ -1,8 +1,8 @@
 import logging
 import tensorflow as tf
 import json
-from model.opts import configure_args
-from model.utils import set_logger, DataGenerator
+from opts import configure_args
+from utils import set_logger, DataGenerator
 
 if __name__ == "__main__":
     args = configure_args()

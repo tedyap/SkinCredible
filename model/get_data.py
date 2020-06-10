@@ -5,8 +5,8 @@ import json
 import pandas as pd
 import os
 
-from model.opts import configure_args
-from model.utils import set_logger
+from opts import configure_args
+from utils import set_logger
 
 
 # detect the dominant language of a sentence
