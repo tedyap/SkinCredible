@@ -1,0 +1,7 @@
+venv/
+.idea/
+data/
+*__pycache__*
+*.npy*
+output/
+test.py
