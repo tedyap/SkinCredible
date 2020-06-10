@@ -6,8 +6,8 @@ from mtcnn.mtcnn import MTCNN
 import numpy as np
 from sklearn.model_selection import train_test_split
 import logging
-from opts import configure_args
-from utils import rotate_image, set_logger
+from model.opts import configure_args
+from model.utils import rotate_image, set_logger
 import s3fs
 import pickle
 import json
