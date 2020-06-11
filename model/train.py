@@ -20,11 +20,14 @@ if __name__ == "__main__":
     testing_generator = DataGenerator(partition['test'], label, batch_size=args.batch_size)
 
     logging.info('Initializing model...')
+    input_shape = (args.frame_size, args.image_size, args.image_size, 3)
 
     model = tf.keras.Sequential()
+    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Flatten(), input_shape=input_shape))
+    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Masking(mask_value=0.)))
+    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Reshape(input_shape[1:])))
     model.add(tf.keras.layers.ConvLSTM2D(filters=40, kernel_size=(3, 3),
-                                          input_shape=(args.frame_size, args.image_size, args.image_size, 3),
-                                          padding='same', return_sequences=True))
+                                         padding='same', return_sequences=True))
     model.add(tf.keras.layers.BatchNormalization())
     model.add(tf.keras.layers.MaxPooling3D(pool_size=(1, 2, 2), padding='same', data_format='channels_last'))
 
