@@ -94,7 +94,7 @@ class DataGenerator(Sequence):
         # Initialization
         x = np.empty((self.batch_size, *self.input_shape))
         y = np.empty((self.batch_size), dtype=int)
-        mask = np.empty((self.batch_size, self.input_shape[0]))
+        mask = np.empty((self.batch_size, self.input_shape[0], 1), dtype=int)
 
         # Generate data
         for i, user_id in enumerate(user_id_list_temp):
