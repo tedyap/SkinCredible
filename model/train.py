@@ -36,7 +36,7 @@ def data_generation(user_id_list_temp, label, args):
         mask[i,] = img_mask
         y[i] = label[str(user_id)]
 
-    return [x, mask], tf.keras.utils.to_categorical(y, num_classes=2)
+    return {'img': x, 'mask': mask}, tf.keras.utils.to_categorical(y, num_classes=2)
 
 
 if __name__ == "__main__":
@@ -56,16 +56,16 @@ if __name__ == "__main__":
     # validation_generator = DataGenerator(partition['validation'], label, batch_size=args.batch_size)
     # testing_generator = DataGenerator(partition['test'], label, batch_size=args.batch_size)
 
-    x_train, y_train = data_generation(partition['train'], label, args)
-    x_val, y_val = data_generation(partition['validation'], label, args)
-    x_test, y_test = data_generation(partition['test'], label, args)
+    #x_train, y_train = data_generation(partition['train'], label, args)
+    #x_val, y_val = data_generation(partition['validation'], label, args)
+    #x_test, y_test = data_generation(partition['test'], label, args)
     strategy = tf.distribute.MirroredStrategy()
     BATCH_SIZE = args.batch_size * strategy.num_replicas_in_sync
     logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
 
-    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).batch(BATCH_SIZE)
-    validation_dataset = tf.data.Dataset.from_tensor_slices((x_val, y_val)).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(BATCH_SIZE)
+    train_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['train'][:args.data_size], label, args))).batch(BATCH_SIZE)
+    validation_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['validation'][:args.data_size], label, args))).batch(BATCH_SIZE)
+    test_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['test'][:args.data_size], label, args))).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
     logging.info(args.batch_size)
