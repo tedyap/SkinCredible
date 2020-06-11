@@ -6,12 +6,12 @@ from utils import set_logger, DataGenerator
 
 if __name__ == "__main__":
     args = configure_args()
-    set_logger('output/train.log')
+    set_logger('../output/train.log')
 
-    with open('output/label.json') as f:
+    with open('../data/label.json') as f:
         label = json.load(f)
 
-    with open('output/partition.json') as f:
+    with open('../data/partition.json') as f:
         partition = json.load(f)
 
     # Generators
@@ -55,10 +55,10 @@ if __name__ == "__main__":
 
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     logging.info('Training model...')
-    csv_logger = tf.keras.callbacks.CSVLogger('output/model.log')
+    csv_logger = tf.keras.callbacks.CSVLogger('../output/model.log')
 
     history = model.fit(training_generator,
                         validation_data=validation_generator,
                         callbacks=[csv_logger],
                         use_multiprocessing=True,
-                        workers=2)
+                        workers=6)
