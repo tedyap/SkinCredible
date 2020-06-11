@@ -55,13 +55,12 @@ def rotate_image(img):
 
 class DataGenerator(Sequence):
     'Generates data for Keras'
-    def __init__(self, user_id_list, labels, batch_size=32, dim=(30, 160, 160), n_channels=3,
+    def __init__(self, user_id_list, labels, batch_size=32, input_shape=(30, 160, 160, 3),
                  n_classes=2, shuffle=True):
-        self.dim = dim
+        self.input_shape = input_shape
         self.batch_size = batch_size
         self.labels = labels
         self.user_id_list = user_id_list
-        self.n_channels = n_channels
         self.n_classes = n_classes
         self.shuffle = shuffle
         self.on_epoch_end()
@@ -79,9 +78,9 @@ class DataGenerator(Sequence):
         user_id_list_temp = [self.user_id_list[k] for k in indexes]
 
         # Generate data
-        x, y = self.__data_generation(user_id_list_temp)
+        input, y = self.__data_generation(user_id_list_temp)
 
-        return x, y
+        return input, y
 
     def on_epoch_end(self):
         'Updates indexes after each epoch'
@@ -91,10 +90,11 @@ class DataGenerator(Sequence):
 
     def __data_generation(self, user_id_list_temp):
         s3 = boto3.client('s3')
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
+        # Generates data containing batch_size samples
         # Initialization
-        x = np.empty((self.batch_size, *self.dim, self.n_channels))
+        x = np.empty((self.batch_size, *self.input_shape))
         y = np.empty((self.batch_size), dtype=int)
+        mask = np.empty((self.batch_size, self.input_shape[0]))
 
         # Generate data
         for i, user_id in enumerate(user_id_list_temp):
@@ -102,7 +102,16 @@ class DataGenerator(Sequence):
             body = response['Body'].read()
             img = pickle.loads(body)
             img /= 255
+            # frame, sz, sz, channel
             x[i, ] = img
+
+            img_mask = np.all((img == 0), axis=1)
+            img_mask = np.all((img_mask == True), axis=1)
+            img_mask = np.all((img_mask == True), axis=1)
+            img_mask = np.expand_dims(img_mask, axis=1)
+
+            mask[i, ] = img_mask
+            input = [x, mask]
             y[i] = self.labels[str(user_id)]
 
-        return x, tf.keras.utils.to_categorical(y, num_classes=self.n_classes)
+        return input, tf.keras.utils.to_categorical(y, num_classes=self.n_classes)
