@@ -92,12 +92,10 @@ if __name__ == "__main__":
 
         model = Model([input_layer, input_mask], output)
 
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
     logging.info('Training model...')
     csv_logger = tf.keras.callbacks.CSVLogger('../output/model.log')
 
     history = model.fit(train_dataset,
                         validation_data=validation_dataset,
-                        callbacks=[csv_logger],
-                        use_multiprocessing=True,
-                        workers=6)
+                        callbacks=[csv_logger])
