@@ -76,7 +76,7 @@ if __name__ == "__main__":
     curr_layer = Masking(mask_value=0.0)(curr_layer)
 
     lstm_out = LSTM(256, dropout=0.5)(curr_layer)
-    output = Dense(output_dim=2, activation='sigmoid')(lstm_out)
+    output = Dense(2, activation='sigmoid')(lstm_out)
 
     model = Model([input_layer, input_mask], output)
 
