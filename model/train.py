@@ -14,9 +14,10 @@ def data_generation(user_id_list_temp, label, args):
     s3 = boto3.client('s3')
     # Generates data containing batch_size samples
     # Initialization
-    x = np.empty((args.batch_size, args.frame_size, args.image_size, args.image_size, 3))
-    y = np.empty((args.batch_size), dtype=int)
-    mask = np.empty((args.batch_size, args.frame_size, 1), dtype=int)
+    data_len = len(user_id_list_temp)
+    x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
+    y = np.empty((data_len), dtype=int)
+    mask = np.empty((data_len, args.frame_size, 1), dtype=int)
 
     # Generate data
     for i, user_id in enumerate(user_id_list_temp):
