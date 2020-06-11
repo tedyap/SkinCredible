@@ -42,10 +42,10 @@ if __name__ == "__main__":
     args = configure_args()
     set_logger('../output/train.log')
 
-    with open('..data/label.json') as f:
+    with open('../data/label.json') as f:
         label = json.load(f)
 
-    with open('..data/partition.json') as f:
+    with open('../data/partition.json') as f:
         partition = json.load(f)
 
     input_shape = (args.frame_size, args.image_size, args.image_size, 3)
