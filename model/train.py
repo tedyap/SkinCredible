@@ -25,6 +25,7 @@ if __name__ == "__main__":
     testing_generator = DataGenerator(partition['test'], label, batch_size=args.batch_size)
 
     logging.info('Initializing model...')
+    logging.info(args.batch_size)
 
 
     # model = tf.keras.Sequential()
