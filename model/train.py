@@ -73,9 +73,9 @@ if __name__ == "__main__":
     with strategy.scope():
         resnet = ResNet50(include_top=False, weights='imagenet', pooling='avg')
 
-        input_layer = Input(shape=input_shape)
+        input_layer = Input(name='img', shape=input_shape)
 
-        input_mask = Input(shape=(args.frame_size, 1))
+        input_mask = Input(name='mask', shape=(args.frame_size, 1))
 
         curr_layer = TimeDistributed(resnet)(input_layer)
 
