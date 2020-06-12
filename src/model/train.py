@@ -116,8 +116,9 @@ if __name__ == "__main__":
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(),
                       metrics=['accuracy'])
     logging.info('Training model...')
-    csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(args.model_dir, 'output/model.log'))
+    # csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(args.model_dir, 'output/model.log'))
+
+    # checkpoint_dir = os.path.join(args.model_dir, 'training_checkpoints')
 
     history = model.fit(train_dataset,
-                        validation_data=validation_dataset,
-                        callbacks=[csv_logger])
+                        validation_data=validation_dataset)
