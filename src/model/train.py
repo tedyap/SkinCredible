@@ -82,12 +82,12 @@ if __name__ == "__main__":
 
     shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
 
-    train_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['train'][:args.data_size],),
+    train_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['train'][:args.data_size], label, args,),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
     validation_dataset = tf.data.Dataset.from_generator(data_generation,
-                                                        args=(partition['validation'][:args.data_size],),
+                                                        args=(partition['validation'][:args.data_size], label, args,),
                                                         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['test'][:args.data_size],),
+    test_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['test'][:args.data_size], label, args,),
                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
