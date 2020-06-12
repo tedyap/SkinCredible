@@ -12,7 +12,7 @@ import numpy as np
 import pickle
 
 
-def data_generation(name, data_size):
+def data_generation(name):
     with open(os.path.join(args.model_dir, 'data/label.json')) as f:
         label = json.load(f)
 
@@ -22,7 +22,7 @@ def data_generation(name, data_size):
     s3 = boto3.client('s3')
     # Initialization
 
-    dataset = partition[name][:args.data_size]
+    dataset = partition[str(name)][:args.data_size]
     data_len = len(dataset)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len), dtype=int)
@@ -85,12 +85,12 @@ if __name__ == "__main__":
 
     shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
 
-    train_dataset = tf.data.Dataset.from_generator(data_generation, args=('train', args.data_size),
+    train_dataset = tf.data.Dataset.from_generator(data_generation, args=('train',),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
     validation_dataset = tf.data.Dataset.from_generator(data_generation,
-                                                        args=('validation', args.data_size,),
+                                                        args=('validation',),
                                                         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(data_generation, args=('test', args.data_size,),
+    test_dataset = tf.data.Dataset.from_generator(data_generation, args=('test',),
                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
