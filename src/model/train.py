@@ -12,17 +12,24 @@ import numpy as np
 import pickle
 
 
-def data_generation(user_id_list_temp, label, args):
+def data_generation(name, data_size):
+    with open(os.path.join(args.model_dir, 'data/label.json')) as f:
+        label = json.load(f)
+
+    with open(os.path.join(args.model_dir, 'data/partition.json')) as f:
+        partition = json.load(f)
+
     s3 = boto3.client('s3')
-    # Generates data containing batch_size samples
     # Initialization
-    data_len = len(user_id_list_temp)
+
+    dataset = partition[name][:args.data_size]
+    data_len = len(dataset)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len), dtype=int)
     mask = np.empty((data_len, args.frame_size), dtype=int)
 
     # Generate data
-    for i, user_id in enumerate(user_id_list_temp):
+    for i, user_id in enumerate(dataset):
         response = s3.get_object(Bucket='cureskin-dataset', Key='data/image_{}.pkl'.format(user_id))
         body = response['Body'].read()
         img = pickle.loads(body)
@@ -46,11 +53,7 @@ if __name__ == "__main__":
 
     set_logger(os.path.join(args.model_dir, 'output/train.log'))
 
-    with open(os.path.join(args.model_dir, 'data/label.json')) as f:
-        label = json.load(f)
 
-    with open(os.path.join(args.model_dir, 'data/partition.json')) as f:
-        partition = json.load(f)
 
     input_shape = (args.frame_size, args.image_size, args.image_size, 3)
 
@@ -82,12 +85,12 @@ if __name__ == "__main__":
 
     shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
 
-    train_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['train'][:args.data_size], label, args,),
+    train_dataset = tf.data.Dataset.from_generator(data_generation, args=('train', args.data_size),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
     validation_dataset = tf.data.Dataset.from_generator(data_generation,
-                                                        args=(partition['validation'][:args.data_size], label, args,),
+                                                        args=('validation', args.data_size,),
                                                         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['test'][:args.data_size], label, args,),
+    test_dataset = tf.data.Dataset.from_generator(data_generation, args=('test', args.data_size,),
                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
