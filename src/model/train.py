@@ -1,14 +1,16 @@
 import logging
+import os
+
 import tensorflow as tf
 import json
 from opts import configure_args
 from tensorflow.keras.layers import Flatten, ConvLSTM2D, BatchNormalization, MaxPool3D, Dense
 from tensorflow.keras import Input, Model
-from tensorflow.keras.applications.resnet50 import ResNet50
 from utils import set_logger, DataGenerator
 import boto3
 import numpy as np
 import pickle
+
 
 def data_generation(user_id_list_temp, label, args):
     s3 = boto3.client('s3')
@@ -34,18 +36,20 @@ def data_generation(user_id_list_temp, label, args):
 
         mask[i,] = img_mask
         y[i] = label[str(user_id)]
+        y = tf.keras.utils.to_categorical(y, num_classes=2)
 
-    return {'img': x, 'mask': mask}, tf.keras.utils.to_categorical(y, num_classes=2)
+    yield (x, mask), y
 
 
 if __name__ == "__main__":
     args = configure_args()
-    set_logger('../output/train.log')
 
-    with open('../data/label.json') as f:
+    set_logger(os.path.join(args.model_dir, 'output/train.log'))
+
+    with open(os.path.join(args.model_dir, 'data/label.json')) as f:
         label = json.load(f)
 
-    with open('../data/partition.json') as f:
+    with open(os.path.join(args.model_dir, 'data/partition.json')) as f:
         partition = json.load(f)
 
     input_shape = (args.frame_size, args.image_size, args.image_size, 3)
@@ -55,28 +59,36 @@ if __name__ == "__main__":
     # validation_generator = DataGenerator(partition['validation'], label, batch_size=args.batch_size)
     # testing_generator = DataGenerator(partition['test'], label, batch_size=args.batch_size)
 
-    #x_train, y_train = data_generation(partition['train'], label, args)
-    #x_val, y_val = data_generation(partition['validation'], label, args)
-    #x_test, y_test = data_generation(partition['test'], label, args)
+    # x_train, y_train = data_generation(partition['train'], label, args)
+    # x_val, y_val = data_generation(partition['validation'], label, args)
+    # x_test, y_test = data_generation(partition['test'], label, args)
     strategy = tf.distribute.MirroredStrategy()
     BATCH_SIZE = args.batch_size * strategy.num_replicas_in_sync
     logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
-    #BATCH_SIZE = args.batch_size
+    # BATCH_SIZE = args.batch_size
 
-    train_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['train'][:args.data_size], label, args))).batch(BATCH_SIZE)
-    validation_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['validation'][:args.data_size], label, args))).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['test'][:args.data_size], label, args))).batch(BATCH_SIZE)
+    types = ((tf.float32, tf.float32), tf.float32)
+
+    shapes = (([None, args.frame_size, args.image_size, args.image_size, 3], [None, args.frame_size]), [None])
+
+    train_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['train'][:args.data_size],),
+                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    validation_dataset = tf.data.Dataset.from_generator(data_generation,
+                                                        args=(partition['validation'][:args.data_size],),
+                                                        output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    test_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['test'][:args.data_size],),
+                                                  output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
-    logging.info(args.batch_size)
+    logging.info('Batch size: {}'.format(args.batch_size))
 
     with strategy.scope():
-
         input_image = Input(name='img', shape=input_shape)
 
         input_mask = Input(name='mask', shape=(args.frame_size,))
 
-        conv_1 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image, mask=input_mask)
+        conv_1 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image,
+                                                                                                   mask=input_mask)
 
         batch_1 = BatchNormalization()(conv_1)
 
@@ -90,7 +102,8 @@ if __name__ == "__main__":
 
         model = Model([input_image, input_mask], output)
 
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(),
+                      metrics=['accuracy'])
     logging.info('Training model...')
     csv_logger = tf.keras.callbacks.CSVLogger('../output/model.log')
 

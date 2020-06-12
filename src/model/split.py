@@ -3,7 +3,7 @@ import numpy as np
 import logging
 from sklearn.model_selection import train_test_split
 
-from model.utils import set_logger
+from src.model.utils import set_logger
 
 if __name__ == "__main__":
 

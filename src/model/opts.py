@@ -4,6 +4,9 @@ import argparse
 def configure_args():
     parser = argparse.ArgumentParser(description='Skin Condition Tracking Model')
 
+    parser.add_argument('--model_dir', default='src',
+                        help="Main directory")
+
     parser.add_argument('--batch_size', type=int, default=8, help='Batch size')
     parser.add_argument('--frame_size', type=int, default=30, help='Maximum number of frames per user')
     parser.add_argument('--image_size', type=int, default=160, help='Image width and height')

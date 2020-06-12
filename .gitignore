@@ -2,8 +2,8 @@ venv/
 .idea/
 *__pycache__*
 *.npy*
-output/
-model/test.py
+src/output/
+src/model/test.py
 *.ipynb*
 *.csv*
 *user*

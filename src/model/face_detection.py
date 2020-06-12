@@ -36,17 +36,16 @@ def extract_face(filename, required_size=(160, 160)):
 
 if __name__ == "__main__":
 
-    if not os.path.exists('output'):
-        os.makedirs('output')
-
     args = configure_args()
-    set_logger('output/train.log')
+    if not os.path.exists(os.path.join(args.model_dir, 'output')):
+        os.makedirs('output')
+    set_logger(os.path.join(args.model_dir, 'output/train.log'))
 
     fs = s3fs.S3FileSystem()
     s3 = boto3.client('s3')
     logging.info('Detecting faces...')
 
-    with open('data/user_data.txt', 'r') as f:
+    with open(os.path.join(args.model_dir, 'data/user_data.txt', 'r')) as f:
         for i, line in islice(enumerate(f), args.start, args.end):
             info = json.loads(line)
             user_id = int(info[0])
