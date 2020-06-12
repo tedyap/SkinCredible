@@ -22,7 +22,7 @@ def data_generation(name):
     s3 = boto3.client('s3')
     # Initialization
 
-    dataset = partition[str(name)][:args.data_size]
+    dataset = partition[name][:args.data_size]
     data_len = len(dataset)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len), dtype=int)
@@ -85,13 +85,9 @@ if __name__ == "__main__":
 
     shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
 
-    train_dataset = tf.data.Dataset.from_generator(data_generation, args=('train',),
-                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    validation_dataset = tf.data.Dataset.from_generator(data_generation,
-                                                        args=('validation',),
-                                                        output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(data_generation, args=('test',),
-                                                  output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    train_dataset = tf.data.Dataset.from_generator(lambda: data_generation('train'), output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    validation_dataset = tf.data.Dataset.from_generator(lambda: data_generation('validation'), output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    test_dataset = tf.data.Dataset.from_generator(lambda: data_generation('test'), output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
     logging.info('Batch size: {}'.format(args.batch_size))
