@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     types = ({'img': tf.float32, 'mask': tf.float32}, tf.float32)
 
-    shapes = (({'img': [args.frame_size, args.image_size, args.image_size, 3], 'mask': [args.frame_size]}), [None])
+    shapes = (({'img': [args.frame_size, args.image_size, args.image_size, 3], 'mask': [args.frame_size]}), [2])
 
     train_dataset = tf.data.Dataset.from_generator(lambda: data_generation(partition['train'][:args.data_size], label, args),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
