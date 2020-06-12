@@ -38,7 +38,7 @@ def data_generation(user_id_list_temp, label, args):
         y[i] = label[str(user_id)]
         y = tf.keras.utils.to_categorical(y, num_classes=2)
 
-    yield (x, mask), y
+    yield {'img': x, 'mask': mask}, y
 
 
 if __name__ == "__main__":
@@ -78,9 +78,9 @@ if __name__ == "__main__":
     logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
     # BATCH_SIZE = args.batch_size
 
-    types = ((tf.float32, tf.float32), tf.float32)
+    types = ({'img': tf.float32, 'mask': tf.float32}, tf.float32)
 
-    shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
+    shapes = (({'img': [args.frame_size, args.image_size, args.image_size, 3], 'mask': [args.frame_size]}), [None])
 
     train_dataset = tf.data.Dataset.from_generator(lambda: data_generation(partition['train'][:args.data_size]),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
@@ -120,5 +120,4 @@ if __name__ == "__main__":
 
     # checkpoint_dir = os.path.join(args.model_dir, 'training_checkpoints')
 
-    history = model.fit(train_dataset,
-                        validation_data=validation_dataset)
+    history = model.fit(train_dataset)
