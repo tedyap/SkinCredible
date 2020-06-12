@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # x_test, y_test = data_generation(partition['test'], label, args)
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
-    
+
     if gpus:
         try:
             for gpu in gpus:
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     types = ((tf.float32, tf.float32), tf.float32)
 
-    shapes = (([None, args.frame_size, args.image_size, args.image_size, 3], [None, args.frame_size]), [None])
+    shapes = (([args.frame_size, args.image_size, args.image_size, 3], [args.frame_size]), [None])
 
     train_dataset = tf.data.Dataset.from_generator(data_generation, args=(partition['train'][:args.data_size],),
                                                    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
