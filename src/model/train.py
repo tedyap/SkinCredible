@@ -120,5 +120,4 @@ if __name__ == "__main__":
 
     # checkpoint_dir = os.path.join(args.model_dir, 'training_checkpoints')
 
-    history = model.fit(train_dataset,
-                        validation_data=validation_dataset)
+    history = model.fit(train_dataset)
