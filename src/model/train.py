@@ -18,7 +18,7 @@ def data_generation(user_id_list_temp, label, args):
     # Initialization
     data_len = len(user_id_list_temp)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
-    y = np.empty((data_len), dtype=int)
+    y = np.empty((data_len, 2), dtype=int)
     mask = np.empty((data_len, args.frame_size), dtype=int)
 
     # Generate data
@@ -36,7 +36,6 @@ def data_generation(user_id_list_temp, label, args):
 
         mask[i,] = img_mask
         y[i] = label[str(user_id)]
-        y = tf.keras.utils.to_categorical(y, num_classes=2)
 
     for x, mask, y in zip(x, mask, y):
         yield {'img': x, 'mask': mask}, y

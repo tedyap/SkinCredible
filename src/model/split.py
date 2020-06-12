@@ -1,23 +1,29 @@
+import os
 import json
 import numpy as np
 import logging
 from sklearn.model_selection import train_test_split
-
 from src.model.utils import set_logger
+from opts import configure_args
 
 if __name__ == "__main__":
 
-    set_logger('../output/train.log')
+    args =configure_args()
+
+    set_logger(os.path.join(args.model_dir, 'output/train.log'))
 
     user_list = []
     label_list = []
     label_dict = {}
-    with open('../data/user_data.txt') as f:
+    with open(os.path.join(args.model_dir, 'data/user_data.txt')) as f:
         for line in f:
             data = json.loads(line)
             user_list.append(int(data[0]))
             label_list.append(int(data[1]))
-            label_dict[int(data[0])] = int(data[1])
+            if int(data[1]) == 0:
+                label_dict[int(data[0])] = [1, 0]
+            else:
+                label_dict[int(data[0])] = [0, 1]
 
         x = np.array(user_list)
         y = np.array(label_list)
@@ -34,8 +40,8 @@ if __name__ == "__main__":
 
         partition = {'train': x_train.tolist(), 'validation': x_val.tolist(), 'test': x_test.tolist()}
 
-        with open('../data/label.json', 'w') as f:
+        with open(os.path.join(args.model_dir, 'data/label.json'), 'w') as f:
             json.dump(label_dict, f)
 
-        with open('../data/partition.json', 'w') as f:
+        with open(os.path.join(args.model_dir, 'data/partition.json'), 'w') as f:
             json.dump(partition, f)
