@@ -2,7 +2,7 @@ import logging
 import tensorflow as tf
 import json
 from opts import configure_args
-from tensorflow.keras.layers import TimeDistributed, LSTM, Dense, Dropout, Multiply, Masking
+from tensorflow.keras.layers import Flatten, ConvLSTM2D, BatchNormalization, MaxPool3D, Dense
 from tensorflow.keras import Input, Model
 from tensorflow.keras.applications.resnet50 import ResNet50
 from utils import set_logger, DataGenerator
@@ -17,7 +17,7 @@ def data_generation(user_id_list_temp, label, args):
     data_len = len(user_id_list_temp)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len), dtype=int)
-    mask = np.empty((data_len, args.frame_size, 1), dtype=int)
+    mask = np.empty((data_len, args.frame_size), dtype=int)
 
     # Generate data
     for i, user_id in enumerate(user_id_list_temp):
@@ -31,7 +31,6 @@ def data_generation(user_id_list_temp, label, args):
         img_mask = np.all((img == 0), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
-        img_mask = np.expand_dims(img_mask, axis=1)
 
         mask[i,] = img_mask
         y[i] = label[str(user_id)]
@@ -41,12 +40,12 @@ def data_generation(user_id_list_temp, label, args):
 
 if __name__ == "__main__":
     args = configure_args()
-    set_logger('../output/train.log')
+    #set_logger('../output/train.log')
 
-    with open('../data/label.json') as f:
+    with open('data/label.json') as f:
         label = json.load(f)
 
-    with open('../data/partition.json') as f:
+    with open('data/partition.json') as f:
         partition = json.load(f)
 
     input_shape = (args.frame_size, args.image_size, args.image_size, 3)
@@ -59,9 +58,10 @@ if __name__ == "__main__":
     #x_train, y_train = data_generation(partition['train'], label, args)
     #x_val, y_val = data_generation(partition['validation'], label, args)
     #x_test, y_test = data_generation(partition['test'], label, args)
-    strategy = tf.distribute.MirroredStrategy()
-    BATCH_SIZE = args.batch_size * strategy.num_replicas_in_sync
-    logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
+    #strategy = tf.distribute.MirroredStrategy()
+    #BATCH_SIZE = args.batch_size * strategy.num_replicas_in_sync
+    #logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
+    BATCH_SIZE = args.batch_size
 
     train_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['train'][:args.data_size], label, args))).batch(BATCH_SIZE)
     validation_dataset = tf.data.Dataset.from_tensor_slices((data_generation(partition['validation'][:args.data_size], label, args))).batch(BATCH_SIZE)
@@ -70,31 +70,29 @@ if __name__ == "__main__":
     logging.info('Initializing model...')
     logging.info(args.batch_size)
 
-    with strategy.scope():
-        resnet = ResNet50(include_top=False, weights='imagenet', pooling='avg')
+    #with strategy.scope():
 
-        input_layer = Input(name='img', shape=input_shape)
+    input_image = Input(name='img', shape=input_shape)
 
-        input_mask = Input(name='mask', shape=(args.frame_size, 1))
+    input_mask = Input(name='mask', shape=(args.frame_size,))
 
-        curr_layer = TimeDistributed(resnet)(input_layer)
+    conv_1 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image, mask=input_mask)
 
-        resnet_output = Dropout(0.5)(curr_layer)
+    batch_1 = BatchNormalization()(conv_1)
 
-        curr_layer = Multiply()([resnet_output, input_mask])
+    max_1 = MaxPool3D(pool_size=(1, 2, 2), padding='same')(batch_1)
 
-        cnn_output = curr_layer
+    flat = Flatten()(max_1)
 
-        curr_layer = Masking(mask_value=0.0)(curr_layer)
+    dense_1 = Dense(64, activation='relu')(flat)
 
-        lstm_out = LSTM(256, dropout=0.5)(curr_layer)
-        output = Dense(2, activation='sigmoid')(lstm_out)
+    output = Dense(2, activation='sigmoid')(dense_1)
 
-        model = Model([input_layer, input_mask], output)
+    model = Model([input_image, input_mask], output)
 
     model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
     logging.info('Training model...')
-    csv_logger = tf.keras.callbacks.CSVLogger('../output/model.log')
+    csv_logger = tf.keras.callbacks.CSVLogger('output/model.log')
 
     history = model.fit(train_dataset,
                         validation_data=validation_dataset,
