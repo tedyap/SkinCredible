@@ -62,6 +62,17 @@ if __name__ == "__main__":
     # x_train, y_train = data_generation(partition['train'], label, args)
     # x_val, y_val = data_generation(partition['validation'], label, args)
     # x_test, y_test = data_generation(partition['test'], label, args)
+
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    
+    if gpus:
+        try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        except RuntimeError as e:
+            logging.error(e)
+
     strategy = tf.distribute.MirroredStrategy()
     BATCH_SIZE = args.batch_size * strategy.num_replicas_in_sync
     logging.info('InSync: {}'.format(strategy.num_replicas_in_sync))
