@@ -38,7 +38,8 @@ def data_generation(user_id_list_temp, label, args):
         y[i] = label[str(user_id)]
         y = tf.keras.utils.to_categorical(y, num_classes=2)
 
-    yield {'img': x, 'mask': mask}, y
+    for x, mask, y in zip(x, mask, y):
+        yield {'img': x, 'mask': mask}, y
 
 
 if __name__ == "__main__":
@@ -120,4 +121,4 @@ if __name__ == "__main__":
 
     # checkpoint_dir = os.path.join(args.model_dir, 'training_checkpoints')
 
-    history = model.fit(train_dataset)
+    history = model.fit(train_dataset, epochs=5)
