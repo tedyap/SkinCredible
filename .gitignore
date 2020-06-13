@@ -6,5 +6,4 @@ src/output/
 src/model/test.py
 *.ipynb*
 *.csv*
-*user*
 *docker*

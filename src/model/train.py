@@ -1,6 +1,6 @@
 import logging
 import os
-
+import cv2
 import tensorflow as tf
 import json
 from opts import configure_args
@@ -10,14 +10,15 @@ from utils import set_logger, DataGenerator
 import boto3
 import numpy as np
 import pickle
+from datetime import datetime
 
 
 def data_generation(user_id_list_temp, label, args):
     s3 = boto3.client('s3')
     # Generates data containing batch_size samples
-    # Initialization
     data_len = len(user_id_list_temp)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
+    resized_img = np.empty((args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len, 2), dtype=int)
     mask = np.empty((data_len, args.frame_size), dtype=int)
 
@@ -25,9 +26,13 @@ def data_generation(user_id_list_temp, label, args):
     for i, user_id in enumerate(user_id_list_temp):
         response = s3.get_object(Bucket='cureskin-dataset', Key='data/image_{}.pkl'.format(user_id))
         body = response['Body'].read()
-        img = pickle.loads(body)
-        img /= 255
-        # frame, sz, sz, channel
+        img_frame = pickle.loads(body)
+
+        for j, img in enumerate(img_frame):
+            resized_img[j,] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
+
+        resized_img /= 255
+        # (batch, frame, size, size, channel)
         x[i,] = img
 
         img_mask = np.all((img == 0), axis=1)
@@ -52,17 +57,6 @@ if __name__ == "__main__":
     with open(os.path.join(args.model_dir, 'data/partition.json')) as f:
         partition = json.load(f)
 
-    input_shape = (args.frame_size, args.image_size, args.image_size, 3)
-
-    # Generators
-    # training_generator = DataGenerator(partition['train'], label, batch_size=args.batch_size, input_shape=input_shape)
-    # validation_generator = DataGenerator(partition['validation'], label, batch_size=args.batch_size)
-    # testing_generator = DataGenerator(partition['test'], label, batch_size=args.batch_size)
-
-    # x_train, y_train = data_generation(partition['train'], label, args)
-    # x_val, y_val = data_generation(partition['validation'], label, args)
-    # x_test, y_test = data_generation(partition['test'], label, args)
-
     gpus = tf.config.experimental.list_physical_devices('GPU')
 
     if gpus:
@@ -82,24 +76,29 @@ if __name__ == "__main__":
 
     shapes = (({'img': [args.frame_size, args.image_size, args.image_size, 3], 'mask': [args.frame_size]}), [2])
 
-    train_dataset = tf.data.Dataset.from_generator(lambda: data_generation(partition['train'][:args.data_size], label, args),
-                                                   output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    train_dataset = tf.data.Dataset.from_generator(
+        lambda: data_generation(partition['train'][:args.data_size], label, args),
+        output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
     validation_dataset = tf.data.Dataset.from_generator(
         lambda: data_generation(partition['validation'][:args.data_size], label, args),
         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(lambda: data_generation(partition['test'][:args.data_size], label, args),
-                                                  output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    test_dataset = tf.data.Dataset.from_generator(
+        lambda: data_generation(partition['test'][:args.data_size], label, args),
+        output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
     logging.info('Batch size: {}'.format(args.batch_size))
 
+    logdir = os.path.join(args.model_dir, 'logs/scalars/' + datetime.now().strftime('%Y%m%d-%H%M%S'))
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+
     with strategy.scope():
-        input_image = Input(name='img', shape=input_shape)
+        input_image = Input(name='img', shape=(args.frame_size, args.image_size, args.image_size, 3))
 
         input_mask = Input(name='mask', shape=(args.frame_size,))
 
         conv_1 = ConvLSTM2D(filters=8, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image,
-                                                                                                   mask=input_mask)
+                                                                                                  mask=input_mask)
 
         batch_1 = BatchNormalization()(conv_1)
 
@@ -115,9 +114,6 @@ if __name__ == "__main__":
 
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy'])
+
     logging.info('Training model...')
-    # csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(args.model_dir, 'output/model.log'))
-
-    # checkpoint_dir = os.path.join(args.model_dir, 'training_checkpoints')
-
-    history = model.fit(train_dataset, epochs=5)
+    history = model.fit(train_dataset, epochs=5, validation_dataset=validation_dataset, callbacks=[tensorboard_callback])

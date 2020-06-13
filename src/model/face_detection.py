@@ -50,10 +50,10 @@ if __name__ == "__main__":
         for i, line in islice(enumerate(f), args.start, args.end):
             info = json.loads(line)
             user_id = int(info[0])
-            user_img = info[3:10]
+            user_img = info[3:-1]
 
             # data.shape = (frame, width, height, channel)
-            data = np.zeros((args.frame_size, args.image_size, args.image_size, 3))
+            data = np.zeros((args.frame_size, 160, 160, 3))
             count = 0
             logging.info('Extract face...')
             for img_path in user_img:
