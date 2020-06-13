@@ -67,7 +67,7 @@ if __name__ == "__main__":
             io = BytesIO()
             pickle.dump(data, io)
             io.seek(0)
-            s3.upload_fileobj(io, 'cureskin-dataset', 'data/image_{}.pkl'.format(user_id))
+            s3.upload_fileobj(io, 'cureskin-dataset', 'new_data/image_{}.pkl'.format(user_id))
 
 
 
