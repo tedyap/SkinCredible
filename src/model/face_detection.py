@@ -45,7 +45,8 @@ if __name__ == "__main__":
     s3 = boto3.client('s3')
     logging.info('Detecting faces...')
 
-    with open(os.path.join(args.model_dir, 'data/user_data.txt', 'r')) as f:
+    with open(os.path.join(args.model_dir, 'data/user_data.txt'), 'r') as f:
+        logging.info('Start...')
         for i, line in islice(enumerate(f), args.start, args.end):
             info = json.loads(line)
             user_id = int(info[0])
@@ -54,6 +55,7 @@ if __name__ == "__main__":
             # data.shape = (frame, width, height, channel)
             data = np.zeros((args.frame_size, args.image_size, args.image_size, 3))
             count = 0
+            logging.info('Extract face...')
             for img_path in user_img:
                 with fs.open('s3://cureskin-dataset/images/{}'.format(img_path)) as file:
                     face = extract_face(file)
@@ -61,7 +63,7 @@ if __name__ == "__main__":
                         pixels = asarray(face)
                         data[count, :, :, :] = pixels
                         count += 1
-
+            logging.info('Upload...')
             io = BytesIO()
             pickle.dump(data, io)
             io.seek(0)

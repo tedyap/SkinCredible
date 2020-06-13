@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
         model = Model([input_image, input_mask], output)
 
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(),
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy'])
     logging.info('Training model...')
     # csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(args.model_dir, 'output/model.log'))
