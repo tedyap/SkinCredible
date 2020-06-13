@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     args = configure_args()
     if not os.path.exists(os.path.join(args.model_dir, 'output')):
-        os.makedirs('output')
+        os.makedirs(os.path.join(args.model_dir,'output'))
     set_logger(os.path.join(args.model_dir, 'output/train.log'))
 
     fs = s3fs.S3FileSystem()
