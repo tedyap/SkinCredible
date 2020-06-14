@@ -123,6 +123,6 @@ if __name__ == "__main__":
         save_best_only=True)
 
     logging.info('Training model...')
-    history = model.fit(train_dataset, epochs=10, validation_dataset=validation_dataset, callbacks=[tensorboard_callback, model_checkpoint_callback])
+    history = model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[tensorboard_callback, model_checkpoint_callback])
 
     model.save(os.path.join(args.model_dir, 'output/convlstm.h5'))
