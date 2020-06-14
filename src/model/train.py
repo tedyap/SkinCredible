@@ -112,7 +112,7 @@ if __name__ == "__main__":
         model = Model([input_image, input_mask], output)
 
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
-                      metrics=['accuracy', 'precision'])
+                      metrics=['accuracy', tf.keras.metrics.Precision()])
 
     checkpoint_filepath = os.path.join(args.model_dir, 'output/checkpoint')
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -123,6 +123,6 @@ if __name__ == "__main__":
         save_best_only=True)
 
     logging.info('Training model...')
-    history = model.fit(train_dataset, epochs=10, validation_dataset=validation_dataset, callbacks=[tensorboard_callback])
+    history = model.fit(train_dataset, epochs=10, validation_dataset=validation_dataset, callbacks=[tensorboard_callback, model_checkpoint_callback])
 
     model.save(os.path.join(args.model_dir, 'output/convlstm.h5'))
