@@ -111,14 +111,14 @@ if __name__ == "__main__":
 
         model = Model([input_image, input_mask], output)
 
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(),
                       metrics=['accuracy', tf.keras.metrics.Precision()])
 
     checkpoint_filepath = os.path.join(args.model_dir, 'output/checkpoint')
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_filepath,
         save_weights_only=True,
-        monitor='val_acc',
+        monitor='val_accuracy',
         mode='max',
         save_best_only=True)
 
