@@ -24,21 +24,21 @@ def data_generation(user_id_list_temp, label, args):
 
     # Generate data
     for i, user_id in enumerate(user_id_list_temp):
-        response = s3.get_object(Bucket='cureskin-dataset', Key='data/image_{}.pkl'.format(user_id))
+        response = s3.get_object(Bucket='cureskin-dataset', Key='new_data/image_{}.pkl'.format(user_id))
         body = response['Body'].read()
         img_frame = pickle.loads(body)
 
         for j, img in enumerate(img_frame):
-            resized_img[j,] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
+            resized_img[j, ] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
 
         resized_img /= 255
         # (batch, frame, size, size, channel)
-        x[i,] = img
+        x[i, ] = resized_img
 
-        img_mask = np.all((img == 0), axis=1)
+        img_mask = np.all((resized_img == 0), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
-
+        img_mask = np.logical_not(img_mask)
         mask[i,] = img_mask
         y[i] = label[str(user_id)]
 
@@ -116,4 +116,4 @@ if __name__ == "__main__":
                       metrics=['accuracy'])
 
     logging.info('Training model...')
-    history = model.fit(train_dataset, epochs=5, validation_dataset=validation_dataset, callbacks=[tensorboard_callback])
+    history = model.fit(train_dataset, epochs=10, validation_dataset=validation_dataset, callbacks=[tensorboard_callback])
