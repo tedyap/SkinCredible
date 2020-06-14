@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
         model = Model([input_image, input_mask], output)
 
-        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.Adam(),
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy', tf.keras.metrics.Precision()])
 
     checkpoint_filepath = os.path.join(args.model_dir, 'output/checkpoint')
