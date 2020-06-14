@@ -18,7 +18,6 @@ def data_generation(user_id_list_temp, label, args):
     # Generates data containing batch_size samples
     data_len = len(user_id_list_temp)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
-    resized_img = np.empty((args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len, 2), dtype=int)
     mask = np.empty((data_len, args.frame_size), dtype=int)
 
@@ -29,17 +28,17 @@ def data_generation(user_id_list_temp, label, args):
         img_frame = pickle.loads(body)
 
         for j, img in enumerate(img_frame):
-            resized_img[j, ] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
+            img_frame[j, ] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
 
-        resized_img /= 255
+        img_frame /= 255
         # (batch, frame, size, size, channel)
-        x[i, ] = resized_img
+        x[i, ] = img_frame
 
-        img_mask = np.all((resized_img == 0), axis=1)
+        img_mask = np.all((img_frame == 0), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.logical_not(img_mask)
-        mask[i,] = img_mask
+        mask[i, ] = img_mask
         y[i] = label[str(user_id)]
 
     for x, mask, y in zip(x, mask, y):
@@ -82,9 +81,9 @@ if __name__ == "__main__":
     validation_dataset = tf.data.Dataset.from_generator(
         lambda: data_generation(partition['validation'][:args.data_size], label, args),
         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
-    test_dataset = tf.data.Dataset.from_generator(
-        lambda: data_generation(partition['test'][:args.data_size], label, args),
-        output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
+    #test_dataset = tf.data.Dataset.from_generator(
+    #    lambda: data_generation(partition['test'][:args.data_size], label, args),
+    #    output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     logging.info('Initializing model...')
     logging.info('Batch size: {}'.format(args.batch_size))
@@ -113,7 +112,17 @@ if __name__ == "__main__":
         model = Model([input_image, input_mask], output)
 
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
-                      metrics=['accuracy'])
+                      metrics=['accuracy', 'precision'])
+
+    checkpoint_filepath = os.path.join(args.model_dir, 'output/checkpoint')
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        save_weights_only=True,
+        monitor='val_acc',
+        mode='max',
+        save_best_only=True)
 
     logging.info('Training model...')
     history = model.fit(train_dataset, epochs=10, validation_dataset=validation_dataset, callbacks=[tensorboard_callback])
+
+    model.save(os.path.join(args.model_dir, 'output/convlstm.h5'))
