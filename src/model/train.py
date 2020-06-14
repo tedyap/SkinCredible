@@ -88,8 +88,7 @@ if __name__ == "__main__":
     logging.info('Initializing model...')
     logging.info('Batch size: {}'.format(args.batch_size))
 
-    logdir = os.path.join(args.model_dir, 'logs/scalars/' + datetime.now().strftime('%Y%m%d-%H%M%S'))
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+    csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(args.model_dir, 'output/model.csv'))
 
     with strategy.scope():
         input_image = Input(name='img', shape=(args.frame_size, args.image_size, args.image_size, 3))
@@ -123,6 +122,6 @@ if __name__ == "__main__":
         save_best_only=True)
 
     logging.info('Training model...')
-    history = model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[tensorboard_callback, model_checkpoint_callback])
+    history = model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger, model_checkpoint_callback])
 
     model.save(os.path.join(args.model_dir, 'output/convlstm.h5'))
