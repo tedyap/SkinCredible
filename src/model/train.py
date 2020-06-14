@@ -19,6 +19,7 @@ def data_generation(user_id_list_temp, label, args):
     data_len = len(user_id_list_temp)
     x = np.empty((data_len, args.frame_size, args.image_size, args.image_size, 3))
     y = np.empty((data_len, 2), dtype=int)
+    resized_img = np.empty((args.frame_size, args.image_size, args.image_size, 3))
     mask = np.empty((data_len, args.frame_size), dtype=int)
 
     # Generate data
@@ -28,13 +29,12 @@ def data_generation(user_id_list_temp, label, args):
         img_frame = pickle.loads(body)
 
         for j, img in enumerate(img_frame):
-            img_frame[j, ] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
-
-        img_frame /= 255
+            resized_img[j, ] = cv2.resize(img, dsize=(args.image_size, args.image_size), interpolation=cv2.INTER_LINEAR)
+        del img_frame
+        resized_img /= 255
         # (batch, frame, size, size, channel)
-        x[i, ] = img_frame
-
-        img_mask = np.all((img_frame == 0), axis=1)
+        x[i, ] = resized_img
+        img_mask = np.all((resized_img == 0), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.logical_not(img_mask)
