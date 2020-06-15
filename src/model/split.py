@@ -8,7 +8,7 @@ from opts import configure_args
 
 if __name__ == "__main__":
 
-    args =configure_args()
+    args = configure_args()
 
     set_logger(os.path.join(args.model_dir, 'output/train.log'))
 
@@ -37,13 +37,18 @@ if __name__ == "__main__":
         (unique, counts) = np.unique(label_list, return_counts=True)
         frequencies = np.asarray((unique, counts)).T
 
+        # only fit even numbers of samples to GPUs
+        train_size = int(len(x_train.tolist())/args.batch_size) * args.batch_size
+        validation_size = int(len(x_val.tolist()) / args.batch_size) * args.batch_size
+        test_size = int(len(x_test.tolist()) / args.batch_size) * args.batch_size
+
         logging.info('Number of positive samples in total: {}'.format(frequencies[1][1]))
         logging.info('Number of negative samples in total: {}'.format(frequencies[0][1]))
-        logging.info('Number of training samples: {}'.format(x_train.shape[0]))
-        logging.info('Number of validation samples: {}'.format(x_val.shape[0]))
-        logging.info('Number of testing samples: {}'.format(x_test.shape[0]))
+        logging.info('Number of training samples: {}'.format(train_size))
+        logging.info('Number of validation samples: {}'.format(validation_size))
+        logging.info('Number of testing samples: {}'.format(test_size))
 
-        partition = {'train': x_train.tolist(), 'validation': x_val.tolist(), 'test': x_test.tolist()}
+        partition = {'train': x_train.tolist()[:train_size], 'validation': x_val.tolist()[:validation_size], 'test': x_test.tolist()[:test_size]}
 
         with open(os.path.join(args.model_dir, 'data/label.json'), 'w') as f:
             json.dump(label_dict, f)
