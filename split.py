@@ -3,19 +3,19 @@ import json
 import numpy as np
 import logging
 from sklearn.model_selection import train_test_split
-from src.model.utils import set_logger
+from model import set_logger
 from opts import configure_args
 
 if __name__ == "__main__":
 
     args = configure_args()
 
-    set_logger(os.path.join(args.model_dir, 'output/train.log'))
+    set_logger('output/train.log')
 
     user_list = []
     label_list = []
     label_dict = {}
-    with open(os.path.join(args.model_dir, 'data/user_data.txt')) as f:
+    with open('data/user_data.txt') as f:
         for line in f:
             data = json.loads(line)
             user_list.append(int(data[0]))
@@ -50,8 +50,8 @@ if __name__ == "__main__":
 
         partition = {'train': x_train.tolist()[:train_size], 'validation': x_val.tolist()[:validation_size], 'test': x_test.tolist()[:test_size]}
 
-        with open(os.path.join(args.model_dir, 'data/label.json'), 'w') as f:
+        with open('data/label.json', 'w') as f:
             json.dump(label_dict, f)
 
-        with open(os.path.join(args.model_dir, 'data/partition.json'), 'w') as f:
+        with open('data/partition.json', 'w') as f:
             json.dump(partition, f)

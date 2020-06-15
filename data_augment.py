@@ -11,7 +11,7 @@ if __name__ == "__main__":
     args = configure_args()
 
     s3 = boto3.client('s3')
-    with open(os.path.join(args.model_dir, 'data/label.json')) as f:
+    with open('data/label.json') as f:
         label = json.load(f)
 
     for user_id, value in label.items():
@@ -23,7 +23,7 @@ if __name__ == "__main__":
             for i, img in enumerate(img_frame):
                 img_frame[i, ] = cv2.flip(img, 1)
 
-            with open(os.path.join(args.model_dir, 'data/user_data.txt'), 'a') as note_file:
+            with open('data/user_data.txt', 'a') as note_file:
                 json.dump(['999' + str(user_id)] + [str(0)], note_file)
                 note_file.write('\n')
             io = BytesIO()

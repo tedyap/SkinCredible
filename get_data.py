@@ -35,13 +35,13 @@ def detect_sentiment(note):
 if __name__ == "__main__":
     args = configure_args()
 
-    if not os.path.exists(os.path.join(args.model_dir, 'output')):
-        os.makedirs(os.path.join(args.model_dir, 'output'))
+    if not os.path.exists('output'):
+        os.makedirs('output')
 
-    if not os.path.exists(os.path.join(args.model_dir, 'data')):
-        os.makedirs(os.path.join(args.model_dir, 'output'))
+    if not os.path.exists('data'):
+        os.makedirs('output')
 
-    set_logger(os.path.join(args.model_dir, 'output/train.log'))
+    set_logger('output/train.log')
 
     fs = s3fs.S3FileSystem()
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     neg_count = 0
     user_count = 0
     # only extract doctor's notes and user's images
-    with open(os.path.join(args.model_dir, 'data/user_data.txt'), 'w') as note_file:
+    with open('data/user_data.txt', 'w') as note_file:
         for user in df_doctor['userId'].unique()[:args.data_size]:
             df_user = df_annotate[df_annotate['userId'] == user].sort_values(by='created_at')
             user_img = df_user['image_path'].tolist()

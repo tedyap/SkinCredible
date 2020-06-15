@@ -2,8 +2,7 @@ venv/
 .idea/
 *__pycache__*
 *.npy*
-src/output/
-src/model/test.py
+test.py
 *.ipynb*
 *.csv*
 *docker*
