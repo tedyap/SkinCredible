@@ -25,6 +25,7 @@ def data_generation(user_id_list_temp, label, args):
     # Generate data
     for i, user_id in enumerate(user_id_list_temp):
         # rename error
+        y[i] = label[str(user_id)]
         user_id = str(user_id)
         if user_id[:3] == '999' and not (user_id == '9993' or user_id == '9996'):
             user_id = '#' + user_id[3:]
@@ -44,7 +45,7 @@ def data_generation(user_id_list_temp, label, args):
         img_mask = np.all((img_mask == True), axis=1)
         img_mask = np.logical_not(img_mask)
         mask[i, ] = img_mask
-        y[i] = label[str(user_id)]
+
 
     for x, mask, y in zip(x, mask, y):
         yield {'img': x, 'mask': mask}, y
