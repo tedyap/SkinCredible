@@ -43,7 +43,7 @@ if __name__ == "__main__":
     with strategy.scope():
         if args.restore:
             logging.info('Restoring model...')
-            model = tf.keras.models.load_model('output/convlstm.h5')
+            model = tf.keras.models.load_model('output/convlstm_{}'.format(args.name))
         else:
             model = create_model(args)
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
@@ -52,5 +52,5 @@ if __name__ == "__main__":
     csv_logger = tf.keras.callbacks.CSVLogger('output/model_{}.csv'.format(args.name))
     logging.info('Training model...')
 
-    model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger, model_checkpoint_callback])
-    model.save('output/convlstm_{}.h5'.format(args.name))
+    model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger])
+    model.save('output/convlstm_{}'.format(args.name))
