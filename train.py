@@ -41,24 +41,16 @@ if __name__ == "__main__":
     logging.info('Batch size: {}'.format(args.batch_size))
 
     with strategy.scope():
-        model = create_model(args)
-
-    checkpoint_filepath = 'output/checkpoint_{}'.format(args.name)
-    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        filepath=checkpoint_filepath,
-        save_weights_only=True,
-        monitor='val_accuracy',
-        mode='max',
-        save_best_only=True)
+        if args.restore:
+            logging.info('Restoring model...')
+            model = tf.keras.models.load_model('output/convlstm.h5')
+        else:
+            model = create_model(args)
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
+                      metrics=['accuracy', tf.keras.metrics.Precision()])
 
     csv_logger = tf.keras.callbacks.CSVLogger('output/model_{}.csv'.format(args.name))
-
     logging.info('Training model...')
-
-    latest = tf.train.latest_checkpoint(checkpoint_filepath)
-    if latest:
-        logging.info('Restoring latest checkpoint...')
-        model.load_weights(latest)
 
     model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger, model_checkpoint_callback])
     model.save('output/convlstm_{}.h5'.format(args.name))

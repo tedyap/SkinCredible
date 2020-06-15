@@ -25,7 +25,4 @@ def create_model(args):
 
     model = Model([input_image, input_mask], output)
 
-    model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
-                  metrics=['accuracy', tf.keras.metrics.Precision()])
-
     return model
