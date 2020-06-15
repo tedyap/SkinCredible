@@ -52,5 +52,5 @@ if __name__ == "__main__":
     csv_logger = tf.keras.callbacks.CSVLogger('output/model_{}.csv'.format(args.name))
     logging.info('Training model...')
 
-    model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger])
+    model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger])
     model.save('output/convlstm_{}'.format(args.name))
