@@ -4,7 +4,7 @@ import cv2
 import tensorflow as tf
 import json
 from opts import configure_args
-from tensorflow.keras.layers import Flatten, ConvLSTM2D, BatchNormalization, MaxPool3D, Dense
+from tensorflow.keras.layers import Flatten, ConvLSTM2D, BatchNormalization, MaxPool3D, MaxPool2D, Dense
 from tensorflow.keras import Input, Model
 from utils import set_logger, DataGenerator
 import boto3
@@ -106,11 +106,9 @@ if __name__ == "__main__":
 
         batch_2 = BatchNormalization()(conv_2)
 
-        max_2 = MaxPool3D(pool_size=(1, 3, 3), padding='same')(batch_2)
+        flat = Flatten()(batch_2)
 
-        flat = Flatten()(max_1)
-
-        dense_1 = Dense(64, activation='relu')(flat)
+        dense_1 = Dense(32, activation='relu')(flat)
 
         output = Dense(2, activation='sigmoid')(dense_1)
 
