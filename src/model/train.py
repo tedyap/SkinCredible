@@ -95,12 +95,18 @@ if __name__ == "__main__":
 
         input_mask = Input(name='mask', shape=(args.frame_size,))
 
-        conv_1 = ConvLSTM2D(filters=8, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image,
+        conv_1 = ConvLSTM2D(filters=20, kernel_size=(3, 3), padding='same', return_sequences=True)(input_image,
                                                                                                   mask=input_mask)
 
         batch_1 = BatchNormalization()(conv_1)
 
         max_1 = MaxPool3D(pool_size=(1, 2, 2), padding='same')(batch_1)
+
+        conv_2 = ConvLSTM2D(filters=10, kernel_size=(3, 3), padding='same', return_sequences=True)(max_1)
+
+        batch_2 = BatchNormalization()(conv_2)
+
+        max_2 = MaxPool3D(pool_size=(1, 2, 2), padding='same')(batch_2)
 
         flat = Flatten()(max_1)
 
