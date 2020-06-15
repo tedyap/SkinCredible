@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
         max_1 = MaxPool3D(pool_size=(1, 2, 2), padding='same')(batch_1)
 
-        conv_2 = ConvLSTM2D(filters=10, kernel_size=(3, 3), padding='same', return_sequences=True)(max_1)
+        conv_2 = ConvLSTM2D(filters=10, kernel_size=(3, 3), padding='same')(max_1, mask=input_mask)
 
         batch_2 = BatchNormalization()(conv_2)
 
