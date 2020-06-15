@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     latest = tf.train.latest_checkpoint(checkpoint_filepath)
     if latest:
+        logging.info('Restoring latest checkpoint...')
         model.load_weights(latest)
 
     model.fit(train_dataset, epochs=10, validation_data=validation_dataset, callbacks=[csv_logger, model_checkpoint_callback])
