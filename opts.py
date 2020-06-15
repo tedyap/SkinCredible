@@ -17,6 +17,6 @@ def configure_args():
     parser.add_argument('--end', type=int, default=0, help='Dataset size')
 
     parser.add_argument('--name', required=True, help='Experiment name')
-    parser.add_argument('--restore', type=bool, action='store_true')
+    parser.add_argument('--restore', action='store_true')
 
     return parser.parse_args()
