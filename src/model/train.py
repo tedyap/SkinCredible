@@ -24,6 +24,10 @@ def data_generation(user_id_list_temp, label, args):
 
     # Generate data
     for i, user_id in enumerate(user_id_list_temp):
+        # rename error
+        if user_id[:3] == '999' and not (user_id == '9993' or user_id == '9996'):
+            user_id = '#' + user_id[3:]
+
         response = s3.get_object(Bucket='cureskin-dataset', Key='new_data/image_{}.pkl'.format(user_id))
         body = response['Body'].read()
         img_frame = pickle.loads(body)

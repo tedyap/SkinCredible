@@ -29,10 +29,10 @@ if __name__ == "__main__":
         y = np.array(label_list)
 
         # split into train and test set
-        x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=0.15, random_state=1)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=0.1, random_state=1)
 
         # split into train and validation set
-        x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, stratify=y_train, test_size=0.15, random_state=2)
+        x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, stratify=y_train, test_size=0.1, random_state=2)
 
         (unique, counts) = np.unique(label_list, return_counts=True)
         frequencies = np.asarray((unique, counts)).T

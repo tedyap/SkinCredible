@@ -22,6 +22,10 @@ if __name__ == "__main__":
             img_frame = pickle.loads(body)
             for i, img in enumerate(img_frame):
                 img_frame[i, ] = cv2.flip(img, 1)
+
+            with open(os.path.join(args.model_dir, 'data/user_data.txt'), 'a') as note_file:
+                json.dump(['999' + str(user_id)] + [str(0)], note_file)
+                note_file.write('\n')
             io = BytesIO()
             pickle.dump(img_frame, io)
             io.seek(0)
