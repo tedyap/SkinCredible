@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         batch_2 = BatchNormalization()(conv_2)
 
-        max_2 = MaxPool3D(pool_size=(1, 2, 2), padding='same')(batch_2)
+        max_2 = MaxPool3D(pool_size=(1, 3, 3), padding='same')(batch_2)
 
         flat = Flatten()(max_1)
 
