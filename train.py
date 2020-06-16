@@ -50,7 +50,7 @@ if __name__ == "__main__":
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy', tf.keras.metrics.Precision()])
 
-    checkpoint_path = 'training_{}/cp-{epoch:04d}.ckpt'.format(args.name)
+    checkpoint_path = 'training_{}'.format(args.name) + '/cp-{epoch:04d}.ckpt'
     checkpoint_dir = os.path.dirname(checkpoint_path)
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_path,
