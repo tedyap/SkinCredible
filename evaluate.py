@@ -1,8 +1,6 @@
 import os
-import tensorflow as tf
 import logging
 from opts import configure_args
-from model.network_architecture import create_model
 from utils import set_logger, data_generation, get_partition_label
 import tensorflow as tf
 
@@ -25,10 +23,10 @@ if __name__ == "__main__":
         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     with strategy.scope():
-        model = create_model
-        model.load_weights(latest)
+        model = tf.keras.models.load_model('output/conv_lstm_{}'.format(args.name))
+        model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
+                      metrics=['accuracy', tf.keras.metrics.Precision()])
 
-        # Re-evaluate the model
-        loss, acc, precision = model.evaluate(test_dataset)
-        logging.info("Restored model, accuracy: {:5.2f}%".format(100 * acc))
-        logging.info("Restored model, precision: {:5.2f}%".format(100 * precision))
+    loss, acc, precision = model.evaluate(test_dataset)
+    logging.info("Restored model, accuracy: {:5.2f}%".format(100 * acc))
+    logging.info("Restored model, precision: {:5.2f}%".format(100 * precision))

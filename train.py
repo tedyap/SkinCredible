@@ -1,7 +1,5 @@
 import logging
-import os
 import tensorflow as tf
-import json
 from opts import configure_args
 from model.network_architecture import create_model
 from utils import set_logger, data_generation, get_partition_label
@@ -10,6 +8,7 @@ from utils import set_logger, data_generation, get_partition_label
 if __name__ == "__main__":
     args = configure_args()
     set_logger('output/train_{}.log'.format(args.name))
+    tf.random.set_seed(100)
     partition, label = get_partition_label()
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
