@@ -6,7 +6,6 @@ from opts import configure_args
 from model.network_architecture import create_model
 from utils import set_logger, data_generation, get_partition_label
 
-
 if __name__ == "__main__":
     args = configure_args()
     set_logger('output/train_{}.log'.format(args.name))
@@ -61,4 +60,5 @@ if __name__ == "__main__":
     logging.info('Training model...')
 
     model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger, cp_callback])
-    model.save('convlstm_{}.h5'.format(args.name), save_format='h5')
+    tf.keras.models.save_model(model=model, filepath='convlstm_{}.h5'.format(args.name), overwrite=True,
+                               include_optimizer=True, save_format=None, signatures=None)
