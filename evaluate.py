@@ -23,7 +23,7 @@ if __name__ == "__main__":
         output_types=types, output_shapes=shapes).batch(BATCH_SIZE)
 
     with strategy.scope():
-        model = tf.keras.models.load_model('output/conv_lstm_{}'.format(args.name))
+        model = tf.keras.models.load_model('conv_lstm_{}.h5'.format(args.name))
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy', tf.keras.metrics.Precision()])
 

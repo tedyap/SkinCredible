@@ -1,4 +1,6 @@
 import logging
+import os
+
 import tensorflow as tf
 from opts import configure_args
 from model.network_architecture import create_model
@@ -42,14 +44,21 @@ if __name__ == "__main__":
     with strategy.scope():
         if args.restore:
             logging.info('Restoring model...')
-            model = tf.keras.models.load_model('convlstm_{}'.format(args.name))
+            model = tf.keras.models.load_model('convlstm_{}.h5'.format(args.name))
         else:
             model = create_model(args)
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                       metrics=['accuracy', tf.keras.metrics.Precision()])
 
+    checkpoint_path = 'training_{}/cp-{epoch:04d}.ckpt'.format(args.name)
+    checkpoint_dir = os.path.dirname(checkpoint_path)
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_path,
+        save_weights_only=True,
+        period=5)
+
     csv_logger = tf.keras.callbacks.CSVLogger('output/model_{}.csv'.format(args.name))
     logging.info('Training model...')
 
-    model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger])
-    model.save('convlstm_{}/'.format(args.name))
+    model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger, cp_callback])
+    model.save('convlstm_{}.h5'.format(args.name), format='h5')
