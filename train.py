@@ -61,4 +61,4 @@ if __name__ == "__main__":
     logging.info('Training model...')
 
     model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger, cp_callback])
-    model.save('convlstm_{}.h5'.format(args.name), format='h5')
+    model.save('convlstm_{}.h5'.format(args.name), save_format='h5')
