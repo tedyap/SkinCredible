@@ -1,7 +1,7 @@
 import os
 import logging
-from opts import configure_args
-from utils import set_logger, data_generation, get_partition_label
+from model.opts import configure_args
+from model.utils import set_logger, data_generation, get_partition_label
 import tensorflow as tf
 
 if __name__ == "__main__":

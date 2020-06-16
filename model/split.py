@@ -1,10 +1,9 @@
-import os
 import json
 import numpy as np
 import logging
 from sklearn.model_selection import train_test_split
 from model import set_logger
-from opts import configure_args
+from model.opts import configure_args
 
 if __name__ == "__main__":
 

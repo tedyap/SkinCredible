@@ -1,8 +1,8 @@
 import boto3
 import pickle
 import cv2
-from opts import configure_args
-from utils import set_logger
+from model.opts import configure_args
+from model.utils import set_logger
 import numpy as np
 from model.network_architecture import create_model
 import tensorflow as tf
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     img_mask = np.logical_not(img_mask)
     mask[0,] = img_mask
 
-    checkpoint_path = 'training_{}'.format(args.name) + '/cp-0005.ckpt'
+    checkpoint_path = 'ckpts'.format(args.name) + '/cp-0005.ckpt'
     model = create_model(args)
     model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
                   metrics=['accuracy', tf.keras.metrics.Precision()])

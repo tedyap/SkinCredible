@@ -2,9 +2,9 @@ import logging
 import os
 
 import tensorflow as tf
-from opts import configure_args
+from model.opts import configure_args
 from model.network_architecture import create_model
-from utils import set_logger, data_generation, get_partition_label
+from model.utils import set_logger, data_generation, get_partition_label
 
 if __name__ == "__main__":
     args = configure_args()

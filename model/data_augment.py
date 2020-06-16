@@ -1,9 +1,8 @@
-import os
 import json
 import pickle
 import boto3
 import cv2
-from opts import configure_args
+from model.opts import configure_args
 from io import BytesIO
 import time
 
