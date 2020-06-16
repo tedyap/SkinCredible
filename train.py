@@ -42,7 +42,7 @@ if __name__ == "__main__":
     with strategy.scope():
         if args.restore:
             logging.info('Restoring model...')
-            model = tf.keras.models.load_model('output/convlstm_{}'.format(args.name))
+            model = tf.keras.models.load_model('convlstm_{}'.format(args.name))
         else:
             model = create_model(args)
         model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True), optimizer=tf.keras.optimizers.SGD(),
@@ -52,4 +52,4 @@ if __name__ == "__main__":
     logging.info('Training model...')
 
     model.fit(train_dataset, epochs=args.epoch, validation_data=validation_dataset, callbacks=[csv_logger])
-    model.save('output/convlstm_{}'.format(args.name))
+    model.save('convlstm_{}/'.format(args.name))
