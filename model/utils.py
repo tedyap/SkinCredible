@@ -1,10 +1,14 @@
 import pickle
+from itertools import islice
+
 import boto3
 from PIL import Image, ExifTags
 import logging
 import numpy as np
 import cv2
 import json
+from mtcnn.mtcnn import MTCNN
+from numpy import asarray
 
 
 def set_logger(log_path):
@@ -97,3 +101,38 @@ def data_generation(user_id_list_temp, label, args):
 
     for x, mask, y in zip(x, mask, y):
         yield {'img': x, 'mask': mask}, y
+
+
+def pre_process(img_frame, args):
+    face_img_frame = np.empty((args.frame_size, args.image_size, args.image_size, 3))
+    x = np.empty((1, args.frame_size, args.image_size, args.image_size, 3))
+    mask = np.empty((1, args.frame_size), dtype=int)
+    detector = MTCNN()
+
+    for i, img in islice(enumerate(img_frame), 0, args.frame_size):
+        img = Image.fromarray((img * 255).astype(np.uint8))
+        img = img.convert('RGB')
+        img = asarray(img)
+        results = detector.detect_faces(img)
+
+        if len(results) == 0:
+            face_img_frame[i, ] = np.zeros((args.image_size, args.image_size, 3))
+        else:
+            x1, y1, width, height = results[0]['box']
+            x1, y1 = abs(x1), abs(y1)
+            x2, y2 = x1 + width, y1 + height
+            face = img[y1:y2, x1:x2]
+            face = Image.fromarray(face)
+            face = face.resize((args.image_size, args.image_size))
+            print(face.shape)
+            face_img_frame[i, ] = face
+    face_img_frame /= 255
+
+    x[0, ] = face_img_frame
+    img_mask = np.all((face_img_frame == 0), axis=1)
+    img_mask = np.all((img_mask == True), axis=1)
+    img_mask = np.all((img_mask == True), axis=1)
+    img_mask = np.logical_not(img_mask)
+    mask[0, ] = img_mask
+
+    return x, mask
