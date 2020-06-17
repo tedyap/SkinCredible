@@ -47,3 +47,7 @@ class APITests(unittest.TestCase):
             rv = client.post('/predict', json={'img': img_frame.tolist()})
             json_data = rv.get_json()
             self.assertTrue(json_data['prob_class'] == 1)
+
+
+if __name__ == '__main__':
+    unittest.main()
