@@ -6,7 +6,11 @@ from model.utils import pre_process
 from model.opts import configure_args
 
 app = Flask(__name__)
-args = configure_args()
+
+
+@app.route('/')
+def index():
+    return 'Welcome to SkinCredible!'
 
 
 @app.route('/predict', methods=['POST'])
@@ -14,7 +18,6 @@ def predict():
     data = request.get_json()
     img_frame = np.array(data['img'])
     x, mask = pre_process(img_frame, args)
-    model = load_model()
     prob = model.predict_on_batch([x, mask])
     prob_class = np.argmax(prob)
     return jsonify(prob_class=int(prob_class))
@@ -27,3 +30,9 @@ def load_model():
                   metrics=['accuracy', tf.keras.metrics.Precision()])
     model.load_weights(checkpoint_path)
     return model
+
+
+if __name__ == '__main__':
+    args = configure_args()
+    model = load_model()
+    app.run(host='0.0.0.0', port=5000, threaded=False)
