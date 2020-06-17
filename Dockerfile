@@ -1,9 +1,9 @@
 FROM python:3.7
 COPY ./api /deploy/
 COPY ./model /deploy/
-COPY ./requirements.txt /deploy/api/
+COPY ./requirements.txt /deploy/
 
-WORKDIR /deploy/
+WORKDIR /deploy/api
 RUN pip install -r requirements.txt
 
 EXPOSE 5000
