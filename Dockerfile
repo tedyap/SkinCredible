@@ -3,8 +3,9 @@ COPY ./api /deploy/
 COPY ./model /deploy/
 COPY ./requirements.txt /deploy/
 
-RUN pip install -r requirements.txt
 WORKDIR /deploy/api
+RUN pip install -r ../requirements.txt
+
 
 EXPOSE 5000
 ENTRYPOINT [ "python" ]
