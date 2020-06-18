@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+import requests
+
 from api.app import app
 from model.opts import configure_args
 
@@ -13,6 +15,7 @@ class APITests(unittest.TestCase):
     """
     Unit tests to check if API can handle images of different frame size and image size
     """
+
     def test_equal_frame_size(self):
         with app.test_client() as client:
             img_frame = np.random.randint(0, 255, size=(args.frame_size, args.image_size, args.image_size, 3))

@@ -1,7 +1,47 @@
-
-
 body {
     min-height: 100vh;
-    background-color: white;
+    background-color: white !important;
 }
+
+#upload {
+    opacity: 0;
+}
+
+#upload-label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+}
+
+.display-4 {
+    font-family: 'ProspectusStd-Bld', 'PT Serif', serif;
+    font-size: 5rem;
+    font-weight: 700;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
+.subheader {
+    font-family: "Montserrat", Sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 3.4px;
+    margin-bottom: 5px !important;
+}
+
+.subsubheader {
+    font-family: "Montserrat", Sans-serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.7px;
+}
+
+.btn-warning {
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #f0ad4e !important;
+}
+
+
 

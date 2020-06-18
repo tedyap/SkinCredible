@@ -104,6 +104,20 @@ def data_generation(user_id_list_temp, label, args):
 
 
 def pre_process(img_frame, args):
+    x = np.empty((1, args.frame_size, args.image_size, args.image_size, 3))
+    mask = np.empty((1, args.frame_size), dtype=int)
+
+    x[0, ] = img_frame
+    img_mask = np.all((img_frame == 0), axis=1)
+    img_mask = np.all((img_mask == True), axis=1)
+    img_mask = np.all((img_mask == True), axis=1)
+    img_mask = np.logical_not(img_mask)
+    mask[0, ] = img_mask
+
+    return x, mask
+
+
+def pre_process_post(img_frame, args):
     face_img_frame = np.empty((args.frame_size, args.image_size, args.image_size, 3))
     x = np.empty((1, args.frame_size, args.image_size, args.image_size, 3))
     mask = np.empty((1, args.frame_size), dtype=int)
@@ -136,3 +150,21 @@ def pre_process(img_frame, args):
     mask[0, ] = img_mask
 
     return x, mask
+
+
+def detect_face(img, args):
+    detector = MTCNN()
+    img = Image.fromarray(img.astype(np.uint8))
+    img = img.convert('RGB')
+    img = asarray(img)
+    results = detector.detect_faces(img)
+    if len(results) == 0:
+        return np.zeros((args.image_size, args.image_size, 3))
+    else:
+        x1, y1, width, height = results[0]['box']
+        x1, y1 = abs(x1), abs(y1)
+        x2, y2 = x1 + width, y1 + height
+        face = img[y1:y2, x1:x2]
+        face = Image.fromarray(face)
+        face = face.resize((args.image_size, args.image_size))
+        return face
