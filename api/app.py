@@ -28,7 +28,7 @@ def upload():
     if len(uploaded_files) == 1:
         return render_template('error.html', message='Please upload more than one selfies above!')
     elif not_allowed_file(uploaded_files):
-        return render_template('error.html', message='Please upload jpg or jpeg files only.')
+        return render_template('error.html', message='Please upload png, jpg or jpeg files...')
     else:
         for i, file in enumerate(uploaded_files):
             img_bytes = file.read()
