@@ -1,12 +1,12 @@
 FROM python:3.7
-COPY ./api /deploy/
-COPY ./model /deploy/
-COPY ./requirements.txt /deploy/
+COPY api /deploy/api/
+COPY model /deploy/model/
+COPY requirements.txt /deploy/
 
-WORKDIR /deploy/api
-RUN pip install -r ../requirements.txt
+WORKDIR /deploy/
+RUN pip install -r requirements.txt
 
 
-EXPOSE 5000
+ENV PYTHONPATH /deploy
 ENTRYPOINT [ "python" ]
-CMD [ "./app.py" ]
+CMD [ "api/app.py" ]
