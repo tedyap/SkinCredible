@@ -24,7 +24,6 @@ def index():
 def upload():
     uploaded_files = request.files.getlist('file[]')
     resized_img = np.empty((args.frame_size, args.image_size, args.image_size, 3))
-    print(uploaded_files)
     if len(uploaded_files) == 1:
         return render_template('error.html', message='Please upload more than one selfies above!')
     elif not_allowed_file(uploaded_files):
@@ -33,7 +32,7 @@ def upload():
         for i, file in enumerate(uploaded_files):
             img_bytes = file.read()
             img = np.array(Image.open(io.BytesIO(img_bytes)))
-            resized_img[i, ] = detect_face(img, args)
+            resized_img[i,] = detect_face(img, args)
         resized_img /= 255
         global img_dict
         img_dict['img'] = resized_img.tolist()
@@ -52,7 +51,7 @@ def predict_as_post():
     return jsonify(prob_class=int(prob_class), negative_prob=float(prob[0]), positive_prob=float(prob[1]))
 
 
-@app.route('/predict', methods=['GET'])
+@app.route('/result', methods=['GET'])
 def predict_as_get():
     global img_dict
     data = img_dict
@@ -64,15 +63,14 @@ def predict_as_get():
         return render_template('error.html', message='SkinCredible did not find any faces...')
 
     prob = np.squeeze(model.predict_on_batch([x, mask]))
-    prob_class = np.argmax(prob)
-    if prob_class == 1:
-        conf = prob[1] * 100
-        message = 'SkinCredible is {:.2f}% confident that your facial skin condition has improved!'.format(conf)
-        return render_template('good.html', message=message)
+    message = 'Analysis: {:.2f}% confident that your facial skin has improved and {:.2f}% confident that your facial skin has become worse.'.format(
+        prob[1] * 100, prob[0] * 100)
+
+    if prob[0] < prob[1]:
+        result = 'Overall Result: Your facial skin condition has improved!'
     else:
-        conf = prob[0] * 100
-        message = 'SkinCredible is {:.2f}% confident that your facial skin condition has become worse'.format(conf)
-        return render_template('bad.html', message=message)
+        result = 'Overall Result: You facial skin condition has become worse...'
+    return render_template('result.html', message=message, result=result)
 
 
 def load_model(args):
