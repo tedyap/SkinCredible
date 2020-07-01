@@ -46,7 +46,7 @@ with 70% postive samples and 30% negative samples. The figure below shows a conf
 
 ![alt text](assets/metric_label.png)
 
-##Training Pipeline
+## Training Pipeline
 1. Run `get_data.py`, which reads user data from `followup_data` directory if the user contains doctor's notes, as indicated by
 `dr_msg_stats.csv`. This script also uses AWS Comprehend to detect the primary language and sentiment of the doctor's notes for each user.
 After running this script, `user_data.txt` will be generated, where each line is a list containing user id, proxy label, dr_notes, and image paths associated with the user id sorted by time created.
