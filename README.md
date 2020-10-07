@@ -2,7 +2,7 @@
 [Insight AI Fellowship Consulting Project] In collaboration with [CureSkin](https://cureskin.com/), SkinCredible leverages 
  deep learning to help dermatologists monitor facial skin conditions over time. Given a series of images taken at different 
  points in time by a user, the idea is to classify whether the user's facial skin condition has improved or deteriorated over time.
- The model is deployed at [skincredible.me](http://skincredible.me).
+The model was previously deployed at skincredible.me. [Here](assets/demo.pdf) are the slides for the project SkinCredible.
  
  
  ## How It Works
