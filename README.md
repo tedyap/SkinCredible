@@ -4,6 +4,7 @@
  points in time by a user, the idea is to classify whether the user's facial skin condition has improved or deteriorated over time.
 The model was previously deployed at skincredible.me. [Here](assets/demo.pdf) are the slides for the project SkinCredible.
  
+ ![alt text](assets/demo.gif)
  
  ## How It Works
 SkinCredible uses a combination of Convolutional Neural Networks (CNNs) and Long Short-Term Memory networks (LSTMs) trained
@@ -11,6 +12,8 @@ SkinCredible uses a combination of Convolutional Neural Networks (CNNs) and Long
 Images can be taken from different angles and orientations, so I apply a pre-processing step and use the pre-trained Multi-Task Cascaded Convolutional Neural Network (MTCNN) to extract
 faces from the image sequence. Since ground truth labels are not available for this supervised learning problem, I came up with the idea to apply sentiment
  analysis with AWS Comprehend to dermatologists' notes to create proxy labels for training.
+ 
+![alt text](assets/slide.png)
  
 ## Files 
 `model`: Directory containing the ConvLSTM model
