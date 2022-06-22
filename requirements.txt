@@ -4,7 +4,7 @@ Flask==1.1.2
 mtcnn==0.1.0
 tensorflow==2.2.0
 pandas==1.0.4
-numpy==1.18.4
+numpy==1.22.0
 matplotlib==3.2.1
 boto3==1.13.21
 streamlit==0.61.0
